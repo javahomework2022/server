@@ -10,6 +10,7 @@ import java.net.Socket;
 public class MessageReceiver implements Runnable{
      Socket socket;
      ObjectInputStream objectInputStream;
+     String username="";
      public MessageReceiver(Socket socket) throws IOException {
           this.socket = socket;
           this.objectInputStream = new ObjectInputStream(socket.getInputStream());
@@ -22,6 +23,8 @@ public class MessageReceiver implements Runnable{
           while (true){
                try {
                     Message message = (Message) objectInputStream.readObject();
+                    String[] commands = message.command.split(" ");
+
                     /*
                     * 这儿接收所有用户的message，需要在登录成功和注册成功后将Program.streams添加对应的人和输出流
                     * TODO
