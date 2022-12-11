@@ -11,6 +11,7 @@ public class User {
     public static Map<String,User> userlist=new HashMap<>();
     //每个用户所在的房间列表
     public Map<String, Room> roomlist=new HashMap<>();
+
     //当前登陆用户
     static User loginUser;
     static {

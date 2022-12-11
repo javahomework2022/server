@@ -9,13 +9,12 @@ public class Register {
         if(unexistUser()){
             User newUser=new User(id,password);
             User.userlist.put(id,newUser);
-            //要将用户信息保存在文件中
-            String information=id+" "+password;
         }
     }
     boolean unexistUser(){
         if(User.userlist.containsKey(id)){
             //向前端界面发送“该账号已被注册”
+            //Test.sendMessage="register_fail_id_used";
             return false;
         }
         else return true;

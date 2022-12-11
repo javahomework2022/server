@@ -7,12 +7,15 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Map;
 
 
 /**
  *
  */
 public class Program {
+    static String flag="null";
+    static Map<String,Thread> userThread=new HashMap<>();
     //一个用户名对于一个输出流,登录后添加
     public static HashMap<String, ObjectOutputStream > streams = new HashMap<>();
     public static void main(String[] args) throws IOException {
@@ -23,7 +26,11 @@ public class Program {
                 while (true)
                 {
                     Socket socket = serverSocket.accept();
-                    new Thread(new MessageReceiver(socket)).start();
+                    Thread newThread=new Thread(new MessageReceiver(socket));
+                    newThread.start();
+                    if(User.userlist.containsKey(flag)){
+                        new Room(User.userlist.get(flag)).creatRoom();
+                    }
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
