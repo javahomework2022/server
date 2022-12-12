@@ -32,7 +32,7 @@ public class MessageReceiver implements Runnable{
                     * TODO
                      */
                     if("register".equals(commands[0])){
-                         new Register(commands[1],commands[2]).register();
+                         loginUser=new Register(commands[1],commands[2]).register();
                          //userThread.put(loginUser.id, this);
                          //向客户端发送 sendmessage
                         // Program.SendMessage();
@@ -47,13 +47,14 @@ public class MessageReceiver implements Runnable{
                          Program.flag=loginUser.id;
                          while(Program.flag.equals(loginUser.id+"_success")){
                               //Program.Sendmeassge();
+                              new Room(User.userlist.get(Program.flag));
                          }
                     }
                     else if("enter".equals(commands[0])){
                          new Room(commands[1]).enterRoom();
                     }
                     else if("quit_room".equals(commands[0])){
-                         new Room(commands[1]).quitRoom();
+                         new Room(commands[1]).quitRoom(loginUser.id);
                     }
                } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(e);

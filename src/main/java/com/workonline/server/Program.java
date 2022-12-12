@@ -28,7 +28,14 @@ public class Program {
                     Socket socket = serverSocket.accept();
                     Thread newThread=new Thread(new MessageReceiver(socket));
                     newThread.start();
-                    if(User.userlist.containsKey(flag)){
+                    String[] flags=flag.split(" ");
+                    if(User.userlist.containsKey(flags[0])){
+                        if(flags[1].equals("register_success"))
+                        {
+                            userThread.put(flags[0],newThread);
+                            flag="null";
+                            flags=null;
+                        }
                         new Room(User.userlist.get(flag)).creatRoom();
                     }
                 }

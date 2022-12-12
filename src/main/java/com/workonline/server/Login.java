@@ -2,7 +2,7 @@ package com.workonline.server;
 
 
 public class Login {
-    String id,password;
+    String id,password,result;
     public Login(String id,String password){
         this.id=id;
         this.password=password;

@@ -42,17 +42,11 @@ public class Room implements Serializable {
         }
 
     }
-    public void quitRoom(){
+    public void quitRoom(String userid){
         if(inRoom()){
             currentRoom=roomlist.get(roomId);
-            if(currentRoom.roomOwner.id.equals(User.loginUser.id)){
-                for(String userid:roomUser.keySet()){
-                    //多线程涉及到退出
-                }
-            }
-            else {
-                User.loginUser.roomlist.remove(roomId, roomlist.get(roomId));
-            }
+            User.loginUser.roomlist.remove(roomId, roomlist.get(roomId));
+
         }
     }
     boolean alreadyLogged(){
@@ -71,7 +65,7 @@ public class Room implements Serializable {
         }
     }
     boolean inRoom(){
-        if(User.loginUser.roomlist.containsKey(roomId))
+        if(User.userlist.get().roomlist.containsKey(roomId))
             return true;
         else{
             Test.sendMessage="room_not_exist";

@@ -5,11 +5,14 @@ public class Register {
         this.id=id;
         this.password=password;
     }
-    public void register(){
+    public User register(){
         if(unexistUser()){
             User newUser=new User(id,password);
             User.userlist.put(id,newUser);
+            Program.flag=id+" register_success";
+            return newUser;
         }
+        return null;
     }
     boolean unexistUser(){
         if(User.userlist.containsKey(id)){
