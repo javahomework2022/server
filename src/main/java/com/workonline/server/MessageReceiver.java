@@ -5,6 +5,7 @@ import com.workonline.util.Message;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +14,9 @@ public class MessageReceiver implements Runnable{
      Socket socket;
      ObjectInputStream objectInputStream;
      String username="";
+     User loginUser=null;
+     static String result;
+     static String[] commands;
      public MessageReceiver(Socket socket) throws IOException {
           this.socket = socket;
           this.objectInputStream = new ObjectInputStream(socket.getInputStream());
@@ -25,36 +29,75 @@ public class MessageReceiver implements Runnable{
           while (true){
                try {
                     Message message = (Message) objectInputStream.readObject();
-                    String[] commands = message.command.split(" ");
-                    User loginUser=null;
+                    commands = message.command.split(" ");
                     /*
                     * 这儿接收所有用户的message，需要在登录成功和注册成功后将Program.streams添加对应的人和输出流
                     * TODO
                      */
                     if("register".equals(commands[0])){
-                         loginUser=new Register(commands[1],commands[2]).register();
-                         //userThread.put(loginUser.id, this);
-                         //向客户端发送 sendmessage
-                        // Program.SendMessage();
+                         new Register(commands[1],commands[2] ).register();
+                         Message newmessage=new Message();
+                         synchronized (result) {
+                              if (result.equals("register_success")) {
+                                   loginUser = User.userlist.get(commands[1]);
+                                   newmessage.command = "register_success";
+                                   //添加对应输出流
+                                   Program.streams.put(loginUser.id, new ObjectOutputStream(socket.getOutputStream()));
+                                   Program.SendMessage(newmessage, commands[1]);
+                              } else if (result.equals("register_fail_id_used")) {
+                                   loginUser = null;
+                                   newmessage.command = "register_fail_id_used";
+                                   //要加一个uid
+                                   Program.SendMessage(newmessage, loginUser.id);
+                              }
+                              try{result.wait();}
+                              catch (InterruptedException e){
+                                   e.printStackTrace();
+                              }
+                         }
                     }
                     else if("login".equals(commands[0])){
                          new Login(commands[1],commands[2]).login();
                          loginUser=User.loginUser;
-                         //向客户端发送 sendmessage
+                         Message newmessage=new Message();
+                         synchronized (result) {
+                              if (result.equals("login_success")) {
+                                   loginUser = User.loginUser;
+                                   newmessage.command = result;
+                                   //添加对应输出流
+                                   Program.streams.put(loginUser.id, new ObjectOutputStream(socket.getOutputStream()));
+                                   Program.SendMessage(newmessage, loginUser.id);
+                              } else if (result.equals("login_fail")) {
+                                   loginUser = null;
+                                   newmessage.command = result;
+                                   //同样要加uid
+                                   Program.SendMessage(newmessage, loginUser.id);
+                              }
+                              try{result.wait();}
+                              catch (InterruptedException e){
+                                   e.printStackTrace();
+                              }
+                         }
                     }
+                    //创建房间
+                    //要返回主线程去创建新的房间线程
                     else if("create_room".equals(commands[0])){
-                         //new Room().creatRoom();
-                         Program.flag=loginUser.id;
-                         while(Program.flag.equals(loginUser.id+"_success")){
-                              //Program.Sendmeassge();
-                              new Room(User.userlist.get(Program.flag));
+                         synchronized (Program.flag) {
+                              //new Room().creatRoom();
+                              Program.flag = loginUser.id + " creatRoom";
+                              Message newmessage = new Message();
+                              String[] results = result.split(" ");
+                              while (results[0].equals(loginUser.id) && results[1].equals("creatRoom_success")) {
+                                   newmessage.command = "creatRoom_success";
+                                   Program.SendMessage(newmessage, loginUser.id);
+                              }
                          }
                     }
                     else if("enter".equals(commands[0])){
-                         new Room(commands[1]).enterRoom();
+                         new Room(commands[1],loginUser.id).enterRoom();
                     }
-                    else if("quit_room".equals(commands[0])){
-                         new Room(commands[1]).quitRoom(loginUser.id);
+                    else if("quit_room".equals(commands[0])) {
+                         new Room(commands[1],loginUser.id).quitRoom(loginUser.id);
                     }
                } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(e);

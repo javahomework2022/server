@@ -5,18 +5,17 @@ public class Register {
         this.id=id;
         this.password=password;
     }
-    public User register(){
-        if(unexistUser()){
-            User newUser=new User(id,password);
-            User.userlist.put(id,newUser);
-            Program.flag=id+" register_success";
-            return newUser;
+    public void register(){
+        if(unexistUser()) {
+            User newUser = new User(id, password);
+            User.userlist.put(id, newUser);
+            MessageReceiver.result = "register_success";
         }
-        return null;
     }
     boolean unexistUser(){
         if(User.userlist.containsKey(id)){
             //向前端界面发送“该账号已被注册”
+            MessageReceiver.result="register_fail_id_used";
             //Test.sendMessage="register_fail_id_used";
             return false;
         }

@@ -8,67 +8,62 @@ public class Room implements Serializable {
     String text;
     User roomOwner;
     String roomId;
+    String userid;
     //存储当前房间中的用户
     Map<String,User>roomUser=new HashMap<>();
     //存储所有的房间
     static Map<String,Room>roomlist=new HashMap<>();
-    static String currentId="10000";
+    static int currentId=10000;
     static Room currentRoom;
     //连接房间和文档
     //新建房间
-    public Room(){
-        this.roomId=Integer.toString(Integer.parseInt(currentId)+1);
-        currentId=roomId;
-        //this.roomOwner=User.loginUser;
-    }
-    public Room(String roomId){
+    public Room(String roomId,String userid){
         this.roomId=roomId;
+        this.userid=userid;
     }
     public Room(User loginUser){
+        this.roomId=Integer.toString(currentId+1);
         roomOwner=loginUser;
     }
     public void creatRoom(){
-        if(alreadyLogged()){
-            //User.loginUser.roomlist.put(this.roomId,this);
-            User.userlist.get(roomOwner.id).roomlist.put(this.roomId,this);
-            this.roomUser.put(roomOwner.id,roomOwner);
-            roomlist.put(this.roomId,this);
-            Program.flag=roomOwner.id+"_success";
+        synchronized (MessageReceiver.result) {
+            User.userlist.get(roomOwner.id).roomlist.put(this.roomId, this);
+            this.roomUser.put(roomOwner.id, roomOwner);
+            roomlist.put(this.roomId, this);
+            Program.flag = roomOwner.id + " creatRoom_success";
+            MessageReceiver.result = Program.flag + " " + roomId;
         }
     }
     public void enterRoom(){
-        if(existroom()){
-            User.loginUser.roomlist.put(roomId,roomlist.get(roomId));
+        synchronized (MessageReceiver.result) {
+            if (existroom()) {
+                User.userlist.get(userid).roomlist.put(roomId, roomlist.get(roomId));
+                roomlist.get(roomId).roomUser.put(userid,User.userlist.get(userid));
+                MessageReceiver.result="enter_room_success "+roomId;
+            }
         }
-
     }
     public void quitRoom(String userid){
-        if(inRoom()){
-            currentRoom=roomlist.get(roomId);
-            User.loginUser.roomlist.remove(roomId, roomlist.get(roomId));
-
-        }
-    }
-    boolean alreadyLogged(){
-        if(User.loginUser!=null)
-            return true;
-        else{
-            return false;
+        synchronized (MessageReceiver.result) {
+            if (inRoom()) {
+                User.userlist.get(userid).roomlist.remove(roomId, roomlist.get(roomId));
+                roomlist.get(roomId).roomUser.remove(userid);
+            }
         }
     }
     boolean existroom(){
         if(roomlist.containsKey(roomId))
             return true;
         else {
-            Test.sendMessage="room_not_exist";
+            MessageReceiver.result="room_not_exist";
             return false;
         }
     }
     boolean inRoom(){
-        if(User.userlist.get().roomlist.containsKey(roomId))
+        if(User.userlist.get(userid).roomlist.containsKey(roomId))
             return true;
         else{
-            Test.sendMessage="room_not_exist";
+            MessageReceiver.result="room_not_exist";
             return false;
         }
     }

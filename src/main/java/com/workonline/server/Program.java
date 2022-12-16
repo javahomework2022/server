@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.cert.CertPathChecker;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,13 +31,16 @@ public class Program {
                     newThread.start();
                     String[] flags=flag.split(" ");
                     if(User.userlist.containsKey(flags[0])){
-                        if(flags[1].equals("register_success"))
+                        if(flags[1].equals("login_success"))
                         {
                             userThread.put(flags[0],newThread);
                             flag="null";
                             flags=null;
                         }
-                        new Room(User.userlist.get(flag)).creatRoom();
+                        else if(flags[1].equals("creatRoom")) {
+                            Thread RoomThread=new Thread(new RoomThread(flags[0]));
+                            RoomThread.start();
+                        }
                     }
                 }
             } catch (IOException e) {
