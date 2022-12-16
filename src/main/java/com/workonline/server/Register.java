@@ -5,18 +5,16 @@ public class Register {
         this.id=id;
         this.password=password;
     }
-    public void register(){
+    public String register(){
         if (unexistUser()) {
             User newUser = new User(id, password);
             User.userlist.put(id, newUser);
-            MessageReceiver.result = "register_success";
+            return "register_success";
         }
+        else return "register_fail_id_used";
     }
     boolean unexistUser(){
         if(User.userlist.containsKey(id)){
-            //向前端界面发送“该账号已被注册”
-            MessageReceiver.result="register_fail_id_used";
-            //Test.sendMessage="register_fail_id_used";
             return false;
         }
         else return true;

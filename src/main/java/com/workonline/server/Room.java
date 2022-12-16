@@ -1,9 +1,12 @@
 package com.workonline.server;
 
+
 import java.io.Serializable;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
+import com.workonline.util.*;
 public class Room implements Serializable {
     String text;
     User roomOwner;
@@ -14,7 +17,11 @@ public class Room implements Serializable {
     //存储所有的房间
     static Map<String,Room>roomlist=new HashMap<>();
     static int currentId=10000;
+
     static Room currentRoom;
+
+    ArrayList<Operation> operations = new ArrayList<>();
+
     //连接房间和文档
     //新建房间
     public Room(String roomId,String userid){
@@ -25,37 +32,39 @@ public class Room implements Serializable {
         this.roomId=Integer.toString(currentId+1);
         roomOwner=loginUser;
     }
-    public void creatRoom(){
-        synchronized (MessageReceiver.result) {
-            User.userlist.get(roomOwner.id).roomlist.put(this.roomId, this);
-            this.roomUser.put(roomOwner.id, roomOwner);
-            roomlist.put(this.roomId, this);
-            Program.flag = roomOwner.id + " creatRoom_success";
-            MessageReceiver.result = Program.flag + " " + roomId;
-        }
+    public String creatRoom(){
+        User.userlist.get(roomOwner.id).roomlist.put(this.roomId, this);
+        this.roomUser.put(roomOwner.id, roomOwner);
+        roomlist.put(this.roomId, this);
+        return "creatRoom_success "+roomId;
     }
-    public void enterRoom(){
-        synchronized (MessageReceiver.result) {
-            if (existroom()) {
-                User.userlist.get(userid).roomlist.put(roomId, roomlist.get(roomId));
-                roomlist.get(roomId).roomUser.put(userid,User.userlist.get(userid));
-                MessageReceiver.result="enter_room_success "+roomId;
-            }
+    public String enterRoom(){
+        if (existroom()) {
+            User.userlist.get(userid).roomlist.put(roomId, roomlist.get(roomId));
+            roomlist.get(roomId).roomUser.put(userid,User.userlist.get(userid));
+            return "enter_room_success";
         }
+        else return "room_not_exist";
     }
     public void quitRoom(String userid){
-        synchronized (MessageReceiver.result) {
-            if (inRoom()) {
-                User.userlist.get(userid).roomlist.remove(roomId, roomlist.get(roomId));
-                roomlist.get(roomId).roomUser.remove(userid);
-            }
+        if (inRoom()) {
+            User.userlist.get(userid).roomlist.remove(roomId);
+            this.roomUser.remove(userid);
         }
+    }
+    public Operation receiveOperation(int version, Operation receivedOperation)throws Exception{
+        Operation operation = (Operation) receivedOperation.clone();
+        for(int i = version;i<operations.size();i++){
+            AbstractMap.SimpleEntry<Operation,Operation> entry = OT.transform(operation,operations.get(i));
+            operation = entry.getKey();
+        }
+        operations.add(operation);
+        return operation;
     }
     boolean existroom(){
         if(roomlist.containsKey(roomId))
             return true;
         else {
-            MessageReceiver.result="room_not_exist";
             return false;
         }
     }
@@ -63,7 +72,6 @@ public class Room implements Serializable {
         if(User.userlist.get(userid).roomlist.containsKey(roomId))
             return true;
         else{
-            MessageReceiver.result="room_not_exist";
             return false;
         }
     }
