@@ -89,6 +89,11 @@ public class MessageReceiver implements Runnable{
                               newmessage.command=result;
                               SendMessage(newmessage);
                          }
+                         Room room=Room.roomlist.get(commands[1]);
+                         newmessage=new Message();
+                         newmessage.command="send_document "+room.operations.size()+" "+room.roomId;
+                         newmessage.document=room.text;
+                         SendMessage(newmessage);
                     }
                     else if("quit_room".equals(commands[0])) {
                          Room room=Room.roomlist.get(commands[1]);
@@ -113,8 +118,11 @@ public class MessageReceiver implements Runnable{
                          Message newmessage=new Message();
                          Text_Operation text_operation=new Text_Operation();
                          text_operation.operation=operation;
+                         text_operation.username=loginUser.id;
                          //添加版本号
                          newmessage.operation=text_operation;
+                         newmessage.command="broadcast "+room.roomId;
+                         SendMessage(newmessage);
                     }
                } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(e);

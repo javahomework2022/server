@@ -38,11 +38,5 @@ public class Program {
 
     public static final Object locker = new Object();
 
-    /*public static void SendMessage(Message message, String username) throws IOException {
-        synchronized (locker) {
-            ObjectOutputStream objectOutputStream = Program.streams.get(username);
-            objectOutputStream.writeObject(message);
-            objectOutputStream.flush();
-        }
-    }*/
+
 }
