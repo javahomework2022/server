@@ -16,9 +16,9 @@ import java.util.Map;
  */
 public class Program {
     static String flag="null";
-    static Map<String,Thread> userThread=new HashMap<>();
+    //static Map<String,Thread> userThread=new HashMap<>();
     //一个用户名对于一个输出流,登录后添加
-    public static HashMap<String, ObjectOutputStream > streams = new HashMap<>();
+    public static HashMap<String, ObjectOutputStream> streams = new HashMap<>();
     public static void main(String[] args) throws IOException {
         //主线程接收tcp请求，对于每个tcp新建线程接收Message，在每一个线程里直接调用SendMessage就好了
 
@@ -29,19 +29,6 @@ public class Program {
                     Socket socket = serverSocket.accept();
                     Thread newThread=new Thread(new MessageReceiver(socket));
                     newThread.start();
-                    String[] flags=flag.split(" ");
-                    if(User.userlist.containsKey(flags[0])){
-                        if(flags[1].equals("login_success"))
-                        {
-                            userThread.put(flags[0],newThread);
-                            flag="null";
-                            flags=null;
-                        }
-                        else if(flags[1].equals("creatRoom")) {
-                            Thread RoomThread=new Thread(new RoomThread(flags[0]));
-                            RoomThread.start();
-                        }
-                    }
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -51,11 +38,11 @@ public class Program {
 
     public static final Object locker = new Object();
 
-    public static void SendMessage(Message message, String username) throws IOException {
+    /*public static void SendMessage(Message message, String username) throws IOException {
         synchronized (locker) {
             ObjectOutputStream objectOutputStream = Program.streams.get(username);
             objectOutputStream.writeObject(message);
             objectOutputStream.flush();
         }
-    }
+    }*/
 }

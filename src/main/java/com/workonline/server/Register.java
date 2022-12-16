@@ -6,7 +6,7 @@ public class Register {
         this.password=password;
     }
     public void register(){
-        if(unexistUser()) {
+        if (unexistUser()) {
             User newUser = new User(id, password);
             User.userlist.put(id, newUser);
             MessageReceiver.result = "register_success";

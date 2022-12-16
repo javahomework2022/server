@@ -13,6 +13,7 @@ import java.util.Map;
 public class MessageReceiver implements Runnable{
      Socket socket;
      ObjectInputStream objectInputStream;
+     ObjectOutputStream objectOutputStream;
      String username="";
      User loginUser=null;
      static String result;
@@ -20,6 +21,7 @@ public class MessageReceiver implements Runnable{
      public MessageReceiver(Socket socket) throws IOException {
           this.socket = socket;
           this.objectInputStream = new ObjectInputStream(socket.getInputStream());
+          this.objectOutputStream=new ObjectOutputStream(socket.getOutputStream());
      }
      /**
      * 这个方法会在新的线程里处理接收到的Message
@@ -35,46 +37,55 @@ public class MessageReceiver implements Runnable{
                     * TODO
                      */
                     if("register".equals(commands[0])){
-                         new Register(commands[1],commands[2] ).register();
-                         Message newmessage=new Message();
                          synchronized (result) {
+                              new Register(commands[1], commands[2]).register();
+                              Message newmessage = new Message();
+                              //注册成功
                               if (result.equals("register_success")) {
                                    loginUser = User.userlist.get(commands[1]);
                                    newmessage.command = "register_success";
                                    //添加对应输出流
                                    Program.streams.put(loginUser.id, new ObjectOutputStream(socket.getOutputStream()));
-                                   Program.SendMessage(newmessage, commands[1]);
-                              } else if (result.equals("register_fail_id_used")) {
+                                   SendMessage(newmessage);
+                              }
+                              //注册失败
+                              else if (result.equals("register_fail_id_used")) {
                                    loginUser = null;
                                    newmessage.command = "register_fail_id_used";
                                    //要加一个uid
-                                   Program.SendMessage(newmessage, loginUser.id);
+                                   SendMessage(newmessage);
                               }
-                              try{result.wait();}
-                              catch (InterruptedException e){
-                                   e.printStackTrace();
-                              }
+                              //唤醒其他线程
+                              result.notifyAll();
+                         }
+                         //让路给其他线程
+                         try{
+                              Thread.sleep(10);
+                         } catch (InterruptedException e){
+                              e.printStackTrace();
                          }
                     }
                     else if("login".equals(commands[0])){
-                         new Login(commands[1],commands[2]).login();
-                         loginUser=User.loginUser;
-                         Message newmessage=new Message();
                          synchronized (result) {
+                              new Login(commands[1], commands[2]).login();
+                              loginUser = User.loginUser;
+                              Message newmessage = new Message();
                               if (result.equals("login_success")) {
                                    loginUser = User.loginUser;
                                    newmessage.command = result;
                                    //添加对应输出流
                                    Program.streams.put(loginUser.id, new ObjectOutputStream(socket.getOutputStream()));
-                                   Program.SendMessage(newmessage, loginUser.id);
+                                   SendMessage(newmessage);
                               } else if (result.equals("login_fail")) {
                                    loginUser = null;
                                    newmessage.command = result;
                                    //同样要加uid
-                                   Program.SendMessage(newmessage, loginUser.id);
+                                   SendMessage(newmessage);
                               }
-                              try{result.wait();}
-                              catch (InterruptedException e){
+                              result.notifyAll();
+                              try {
+                                   result.wait();
+                              } catch (InterruptedException e) {
                                    e.printStackTrace();
                               }
                          }
@@ -82,16 +93,7 @@ public class MessageReceiver implements Runnable{
                     //创建房间
                     //要返回主线程去创建新的房间线程
                     else if("create_room".equals(commands[0])){
-                         synchronized (Program.flag) {
-                              //new Room().creatRoom();
-                              Program.flag = loginUser.id + " creatRoom";
-                              Message newmessage = new Message();
-                              String[] results = result.split(" ");
-                              while (results[0].equals(loginUser.id) && results[1].equals("creatRoom_success")) {
-                                   newmessage.command = "creatRoom_success";
-                                   Program.SendMessage(newmessage, loginUser.id);
-                              }
-                         }
+                         Thread RoomThread=new Thread(new RoomThread(loginUser.id));
                     }
                     else if("enter".equals(commands[0])){
                          new Room(commands[1],loginUser.id).enterRoom();
@@ -101,6 +103,17 @@ public class MessageReceiver implements Runnable{
                     }
                } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
+               }
+          }
+     }
+     public void SendMessage(Message message){
+          synchronized (result){
+               try{
+                    objectOutputStream.writeObject(message);
+                    objectOutputStream.flush();
+               }
+               catch (IOException e){
+                    e.printStackTrace();
                }
           }
      }

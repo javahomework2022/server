@@ -12,35 +12,29 @@ public class Login {
      *
      */
     public void login(){
-        synchronized (MessageReceiver.result) {
-            if (correctPassword()) {
-                MessageReceiver.result = "login_success";
-                Program.flag = id + " login_success";
-            }
+        if (correctPassword()) {
+            MessageReceiver.result = "login_success";
+            Program.flag = id + " login_success";
         }
     }
     boolean existUser(){
-        synchronized (MessageReceiver.result) {
-            if (User.userlist.containsKey(id))
-                return true;
-            else {
-                //前端输出"登陆失败"
-                MessageReceiver.result = "login_fail";
-                return false;
-            }
+        if (User.userlist.containsKey(id))
+            return true;
+        else {
+            //前端输出"登陆失败"
+            MessageReceiver.result = "login_fail";
+            return false;
         }
     }
     boolean correctPassword() {
-        synchronized (MessageReceiver.result) {
-            if (existUser()) {
-                if (User.userlist.get(id).password.equals(password)) {
-                    //前端输出“登陆成功"
-                    return true;
-                }
-                //前端输出“登陆失败”
-                MessageReceiver.result = "login_fail";
+        if (existUser()) {
+            if (User.userlist.get(id).password.equals(password)) {
+                //前端输出“登陆成功"
+                return true;
             }
-            return false;
+            //前端输出“登陆失败”
+            MessageReceiver.result = "login_fail";
         }
+        return false;
     }
 }
