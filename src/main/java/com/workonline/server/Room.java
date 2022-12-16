@@ -61,9 +61,6 @@ public class Room implements Serializable {
         operations.add(operation);
         return operation;
     }
-    public void sendDocument(){
-
-    }
     boolean existroom(){
         if(roomlist.containsKey(roomId))
             return true;

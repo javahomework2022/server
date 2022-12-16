@@ -18,6 +18,7 @@ public class MessageReceiver implements Runnable{
      User loginUser=null;
      String result;
      static String[] commands;
+     boolean ifLogined=true;
      public MessageReceiver(Socket socket) throws IOException {
           this.socket = socket;
           this.objectInputStream = new ObjectInputStream(socket.getInputStream());
@@ -28,7 +29,7 @@ public class MessageReceiver implements Runnable{
      */
      @Override
      public void run() {
-          while (true){
+          while (ifLogined){
                try {
                     Message message = (Message) objectInputStream.readObject();
                     commands = message.command.split(" ");
@@ -43,8 +44,6 @@ public class MessageReceiver implements Runnable{
                          if (result.equals("register_success")) {
                               loginUser = User.userlist.get(commands[1]);
                               newmessage.command = "register_success";
-                              //添加对应输出流
-                              Program.streams.put(loginUser.id, new ObjectOutputStream(socket.getOutputStream()));
                               SendMessage(newmessage);
                          }
                          //注册失败
@@ -61,8 +60,6 @@ public class MessageReceiver implements Runnable{
                          if (result.equals("login_success")) {
                               loginUser = User.userlist.get(commands[1]);
                               newmessage.command = result;
-                              //添加对应输出流
-                              Program.streams.put(loginUser.id, new ObjectOutputStream(socket.getOutputStream()));
                               SendMessage(newmessage);
                          } else if (result.equals("login_fail")) {
                               loginUser = null;
@@ -123,6 +120,11 @@ public class MessageReceiver implements Runnable{
                          newmessage.operation=text_operation;
                          newmessage.command="broadcast "+room.roomId;
                          SendMessage(newmessage);
+                    }
+                    else if("log_out".equals(commands[0])){
+                         if(commands[1].equals(loginUser.id)){
+                              ifLogined=false;
+                         }
                     }
                } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
