@@ -107,10 +107,16 @@ public class MessageReceiver implements Runnable{
                     }
                     else if("close_room".equals(commands[0])){
                          Room room=Room.roomlist.get(commands[1]);
+                         Message newmessage=new Message();
+                         newmessage.command="room_closed "+room.roomId;
                          for(String userid:room.roomUser.keySet()){
-                              Message newmessage=new Message();
-                              newmessage.command="room_closed "+room.roomId;
-                              SendMessage(newmessage);
+                              try{
+                                   streams.get(userid).writeObject(newmessage);
+                                   streams.get(userid).flush();
+                              }
+                              catch (IOException e){
+                                   e.printStackTrace();
+                              }
                          }
                          Room.roomlist.remove(room.roomId);
                     }
