@@ -12,10 +12,6 @@ public class User {
     //每个用户所在的房间列表
     public Map<String, Room> roomlist=new HashMap<>();
     //当前登陆用户
-    static User loginUser;
-    static {
-        loginUser =null;
-    }
     public User(String id,String password){
         this.id=id;
         this.password=password;

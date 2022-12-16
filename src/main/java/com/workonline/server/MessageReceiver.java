@@ -55,7 +55,6 @@ public class MessageReceiver implements Runnable{
                     }
                     else if("login".equals(commands[0])){
                          result=new Login(commands[1], commands[2]).login();
-                         loginUser = User.loginUser;
                          Message newmessage = new Message();
                          if (result.equals("login_success")) {
                               loginUser = User.userlist.get(commands[1]);
@@ -73,7 +72,7 @@ public class MessageReceiver implements Runnable{
                          result=new Room(loginUser).creatRoom(message.document);
                          String[] results=result.split(" ");
                          Message newmessage=new Message();
-                         if(results[1].equals("creatRoom_success")){
+                         if(results[0].equals("create_room_success")){
                               newmessage.command=results[1];
                               SendMessage(newmessage);
                          }
@@ -82,15 +81,22 @@ public class MessageReceiver implements Runnable{
                          result=new Room(commands[1],loginUser.id).enterRoom();
                          String[] results=result.split(" ");
                          Message newmessage=new Message();
-                         if(results[1].equals("enter_room_success")||result.equals("enter_room_fail")){
+                         if(results[0].equals("enter_room_success")||result.equals("enter_room_fail")){
                               newmessage.command=result;
                               SendMessage(newmessage);
                          }
-                         Room room=Room.roomlist.get(commands[1]);
-                         newmessage=new Message();
-                         newmessage.command="send_document "+room.operations.size()+" "+room.roomId;
-                         newmessage.document=room.text;
-                         SendMessage(newmessage);
+                         if(results[0].equals("enter_room_success")) {
+                              Room room = Room.roomlist.get(commands[1]);
+                              newmessage = new Message();
+                              newmessage.command = "send_document " + room.operations.size() + " " + room.roomId;
+                              newmessage.document = room.text;
+                              try {
+                                   Thread.sleep(1000);
+                              } catch (InterruptedException e) {
+                                   e.printStackTrace();
+                              }
+                              SendMessage(newmessage);
+                         }
                     }
                     else if("quit_room".equals(commands[0])) {
                          Room room=Room.roomlist.get(commands[1]);
