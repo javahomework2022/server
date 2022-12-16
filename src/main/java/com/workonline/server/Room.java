@@ -17,13 +17,7 @@ public class Room implements Serializable {
     //存储所有的房间
     static Map<String,Room>roomlist=new HashMap<>();
     static int currentId=10000;
-
-    static Room currentRoom;
-
     ArrayList<Operation> operations = new ArrayList<>();
-
-    //连接房间和文档
-    //新建房间
     public Room(String roomId,String userid){
         this.roomId=roomId;
         this.userid=userid;
@@ -32,19 +26,20 @@ public class Room implements Serializable {
         this.roomId=Integer.toString(currentId+1);
         roomOwner=loginUser;
     }
-    public String creatRoom(){
+    public String creatRoom(String text){
         User.userlist.get(roomOwner.id).roomlist.put(this.roomId, this);
         this.roomUser.put(roomOwner.id, roomOwner);
         roomlist.put(this.roomId, this);
-        return "creatRoom_success "+roomId;
+        this.text=text;
+        return "create_room_success "+roomId;
     }
     public String enterRoom(){
         if (existroom()) {
             User.userlist.get(userid).roomlist.put(roomId, roomlist.get(roomId));
             roomlist.get(roomId).roomUser.put(userid,User.userlist.get(userid));
-            return "enter_room_success";
+            return "enter_room_success "+roomId;
         }
-        else return "room_not_exist";
+        else return "enter_room_fail";
     }
     public void quitRoom(String userid){
         if (inRoom()) {

@@ -70,7 +70,7 @@ public class MessageReceiver implements Runnable{
                     //创建房间
                     //要返回主线程去创建新的房间线程
                     else if("create_room".equals(commands[0])){
-                         result=new Room(loginUser).creatRoom();
+                         result=new Room(loginUser).creatRoom(message.document);
                          String[] results=result.split(" ");
                          Message newmessage=new Message();
                          if(results[1].equals("creatRoom_success")){
@@ -82,7 +82,7 @@ public class MessageReceiver implements Runnable{
                          result=new Room(commands[1],loginUser.id).enterRoom();
                          String[] results=result.split(" ");
                          Message newmessage=new Message();
-                         if(results[1].equals("enter_room_success")||result.equals("room_not_exist")){
+                         if(results[1].equals("enter_room_success")||result.equals("enter_room_fail")){
                               newmessage.command=result;
                               SendMessage(newmessage);
                          }
@@ -97,11 +97,13 @@ public class MessageReceiver implements Runnable{
                          room.quitRoom(loginUser.id);
                     }
                     else if("close_room".equals(commands[0])){
-                         for(String userid:Room.roomlist.get(commands[1]).roomUser.keySet()){
+                         Room room=Room.roomlist.get(commands[1]);
+                         for(String userid:room.roomUser.keySet()){
                               Message newmessage=new Message();
-                              newmessage.command="room_closed "+commands[1];
+                              newmessage.command="room_closed "+room.roomId;
                               SendMessage(newmessage);
                          }
+                         Room.roomlist.remove(room.roomId);
                     }
                     else if("operation".equals(commands[0])){
                          Room room=Room.roomlist.get(commands[1]);
@@ -116,7 +118,6 @@ public class MessageReceiver implements Runnable{
                          Text_Operation text_operation=new Text_Operation();
                          text_operation.operation=operation;
                          text_operation.username=loginUser.id;
-                         //添加版本号
                          newmessage.operation=text_operation;
                          newmessage.command="broadcast "+room.roomId;
                          SendMessage(newmessage);
