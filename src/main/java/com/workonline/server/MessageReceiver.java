@@ -19,6 +19,7 @@ public class MessageReceiver implements Runnable{
      String result;
      static String[] commands;
      boolean ifLogined=true;
+     static Map<String,ObjectOutputStream>streams=new HashMap<>();
      public MessageReceiver(Socket socket) throws IOException {
           this.socket = socket;
           this.objectInputStream = new ObjectInputStream(socket.getInputStream());
@@ -44,6 +45,7 @@ public class MessageReceiver implements Runnable{
                          if (result.equals("register_success")) {
                               loginUser = User.userlist.get(commands[1]);
                               newmessage.command = "register_success";
+                              streams.put(loginUser.id,objectOutputStream);
                               SendMessage(newmessage);
                          }
                          //注册失败
@@ -59,6 +61,7 @@ public class MessageReceiver implements Runnable{
                          if (result.equals("login_success")) {
                               loginUser = User.userlist.get(commands[1]);
                               newmessage.command = result;
+                              streams.put(loginUser.id,objectOutputStream);
                               SendMessage(newmessage);
                          } else if (result.equals("login_fail")) {
                               loginUser = null;
@@ -112,21 +115,30 @@ public class MessageReceiver implements Runnable{
                          Room.roomlist.remove(room.roomId);
                     }
                     else if("operation".equals(commands[0])){
-                         Room room=Room.roomlist.get(commands[1]);
-                         Operation operation=new Operation();
-                         try{
-                              operation=room.receiveOperation(message.operation.version,message.operation.operation);
+                         synchronized (Room.roomlist.get(commands[1])) {
+                              Room room = Room.roomlist.get(commands[1]);
+                              Operation operation = new Operation();
+                              try {
+                                   operation = room.receiveOperation(message.operation.version, message.operation.operation);
+                              } catch (Exception e) {
+                                   e.printStackTrace();
+                              }
+                              Message newmessage = new Message();
+                              Text_Operation text_operation = new Text_Operation();
+                              text_operation.operation = operation;
+                              text_operation.username = message.operation.username;
+                              newmessage.operation = text_operation;
+                              newmessage.command = "broadcast " + room.roomId;
+                              for(String userid:room.roomUser.keySet()){
+                                   try{
+                                        streams.get(userid).writeObject(newmessage);
+                                        streams.get(userid).flush();
+                                   }
+                                   catch (IOException e){
+                                        e.printStackTrace();
+                                   }
+                              }
                          }
-                         catch (Exception e){
-                              e.printStackTrace();
-                         }
-                         Message newmessage=new Message();
-                         Text_Operation text_operation=new Text_Operation();
-                         text_operation.operation=operation;
-                         text_operation.username=loginUser.id;
-                         newmessage.operation=text_operation;
-                         newmessage.command="broadcast "+room.roomId;
-                         SendMessage(newmessage);
                     }
                     else if("log_out".equals(commands[0])){
                          if(commands[1].equals(loginUser.id)){
@@ -139,8 +151,18 @@ public class MessageReceiver implements Runnable{
           }
      }
      public void SendMessage(Message message){
+          try{
+               objectOutputStream.writeObject(message);
+               objectOutputStream.flush();
+          }
+          catch (IOException e){
+               e.printStackTrace();
+          }
+     }
+     /*public void SendMessage(Message message,String userid){
           synchronized (result){
                try{
+                    ObjectOutputStream newobjectoutput=
                     objectOutputStream.writeObject(message);
                     objectOutputStream.flush();
                }
@@ -148,5 +170,5 @@ public class MessageReceiver implements Runnable{
                     e.printStackTrace();
                }
           }
-     }
+     }*/
 }
