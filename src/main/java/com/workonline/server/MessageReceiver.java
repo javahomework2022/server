@@ -84,20 +84,15 @@ public class MessageReceiver implements Runnable{
                          result=new Room(commands[1],loginUser.id).enterRoom();
                          String[] results=result.split(" ");
                          Message newmessage=new Message();
-                         if(results[0].equals("enter_room_success")||result.equals("enter_room_fail")){
+                         if(result.equals("enter_room_fail")){
                               newmessage.command=result;
                               SendMessage(newmessage);
                          }
-                         if(results[0].equals("enter_room_success")) {
+                         else if(results[0].equals("enter_room_success")) {
                               Room room = Room.roomlist.get(commands[1]);
                               newmessage = new Message();
-                              newmessage.command = "send_document " + room.operations.size() + " " + room.roomId;
+                              newmessage.command = "enter_room_success " + room.operations.size() + " " + room.roomId;
                               newmessage.document = room.text;
-                              try {
-                                   Thread.sleep(1000);
-                              } catch (InterruptedException e) {
-                                   e.printStackTrace();
-                              }
                               SendMessage(newmessage);
                          }
                     }
