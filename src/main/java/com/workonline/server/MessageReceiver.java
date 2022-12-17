@@ -122,21 +122,29 @@ public class MessageReceiver implements Runnable{
                               try {
                                    operation = room.receiveOperation(message.operation.version, message.operation.operation);
                                    StringBuilder newStr = new StringBuilder();
+                                   int index = 0;
                                    for(AtomicOperation i:operation.getOperations())
                                    {
                                         if(i.isInsert())
                                         {
                                              newStr.append(i.getInsertString());
                                         }
+                                        else if(i.isDelete())
+                                        {
+                                             int len = newStr.length();
+                                             newStr.delete(len-i.getDeleteLength(),len);
+                                        }
                                         else if(i.isRetain())
                                         {
-                                             newStr.append(room.text, 0, i.getRetainLength());
+                                             newStr.append(room.text, index, index+i.getRetainLength());
+                                             index += i.getRetainLength();
                                         }
                                    }
                                    room.text=newStr.toString();
                               } catch (Exception e) {
                                    e.printStackTrace();
                               }
+
                               Message newmessage = new Message();
                               Text_Operation text_operation = new Text_Operation(0,username,operation);
                               text_operation.operation = operation;
