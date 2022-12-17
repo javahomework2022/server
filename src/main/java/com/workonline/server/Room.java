@@ -33,8 +33,8 @@ public class Room implements Serializable {
         this.text=text;
         return "create_room_success "+roomId;
     }
-    public String enterRoom(){
-        if (existroom()) {
+    public static String enterRoom(String userid,String roomId){
+        if (existroom(roomId)) {
             User.userlist.get(userid).roomlist.put(roomId, roomlist.get(roomId));
             roomlist.get(roomId).roomUser.put(userid,User.userlist.get(userid));
             return "enter_room_success "+roomId;
@@ -42,7 +42,7 @@ public class Room implements Serializable {
         else return "enter_room_fail";
     }
     public void quitRoom(String userid){
-        if (inRoom()) {
+        if (inRoom(userid,roomId)) {
             User.userlist.get(userid).roomlist.remove(roomId);
             this.roomUser.remove(userid);
         }
@@ -56,14 +56,14 @@ public class Room implements Serializable {
         operations.add(operation);
         return operation;
     }
-    boolean existroom(){
+    static boolean existroom(String roomId){
         if(roomlist.containsKey(roomId))
             return true;
         else {
             return false;
         }
     }
-    boolean inRoom(){
+    static boolean inRoom(String userid,String roomId){
         if(User.userlist.get(userid).roomlist.containsKey(roomId))
             return true;
         else{

@@ -10,6 +10,8 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.workonline.server.Room.enterRoom;
+
 public class MessageReceiver implements Runnable{
      Socket socket;
      ObjectInputStream objectInputStream;
@@ -34,6 +36,7 @@ public class MessageReceiver implements Runnable{
                try {
                     Message message = (Message) objectInputStream.readObject();
                     commands = message.command.split(" ");
+                    System.out.println("收到命令："+message.command);
                     /*
                     * 这儿接收所有用户的message，需要在登录成功和注册成功后将Program.streams添加对应的人和输出流
                     * TODO
@@ -82,7 +85,7 @@ public class MessageReceiver implements Runnable{
                          }
                     }
                     else if("enter".equals(commands[0])){
-                         result=new Room(commands[1],loginUser.id).enterRoom();
+                         result=enterRoom(loginUser.id,commands[1]);
                          String[] results=result.split(" ");
                          Message newmessage=new Message();
                          if(result.equals("enter_room_fail")){
@@ -156,8 +159,10 @@ public class MessageReceiver implements Runnable{
           try{
                objectOutputStream.writeObject(message);
                objectOutputStream.flush();
+               System.out.println("成功发送:"+message.command);
           }
           catch (IOException e){
+               System.out.println("发送失败:"+message.command);
                e.printStackTrace();
           }
      }
