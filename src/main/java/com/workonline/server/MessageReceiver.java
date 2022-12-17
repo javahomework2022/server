@@ -109,18 +109,14 @@ public class MessageReceiver implements Runnable{
                          Message newmessage=new Message();
                          newmessage.command="room_closed "+room.roomId;
                          for(String userid:room.roomUser.keySet()){
-                              try{
-                                   streams.get(userid).writeObject(newmessage);
-                                   streams.get(userid).flush();
-                              }
-                              catch (IOException e){
-                                   e.printStackTrace();
-                              }
+                              SendMessageByUserid(newmessage, userid);
                          }
                          Room.roomlist.remove(room.roomId);
                     }
                     else if("operation".equals(commands[0])){
                          synchronized (Room.roomlist.get(commands[1])) {
+                              System.out.println("收到operation:来自："+message.operation.username+" 版本:"+message.operation.version);
+                              System.out.println(message.operation.operation.toString());
                               Room room = Room.roomlist.get(commands[1]);
                               Operation operation = new Operation();
                               try {
@@ -144,17 +140,13 @@ public class MessageReceiver implements Runnable{
                               Message newmessage = new Message();
                               Text_Operation text_operation = new Text_Operation(0,username,operation);
                               text_operation.operation = operation;
+                              System.out.println("广播operation:");
+                              System.out.println(operation.toString());
                               text_operation.username = message.operation.username;
                               newmessage.operation = text_operation;
                               newmessage.command = "broadcast " + room.roomId;
                               for(String userid:room.roomUser.keySet()){
-                                   try{
-                                        streams.get(userid).writeObject(newmessage);
-                                        streams.get(userid).flush();
-                                   }
-                                   catch (IOException e){
-                                        e.printStackTrace();
-                                   }
+                                   SendMessageByUserid(newmessage, userid);
                               }
                          }
                     }
@@ -168,6 +160,18 @@ public class MessageReceiver implements Runnable{
                }
           }
      }
+
+     private void SendMessageByUserid(Message newmessage, String userid) {
+          try {
+               streams.get(userid).writeObject(newmessage);
+               streams.get(userid).flush();
+               System.out.println("成功发送:"+newmessage.command);
+          } catch (IOException e){
+               System.out.println("发送失败:"+newmessage.command);
+               e.printStackTrace();
+          }
+     }
+
      public void SendMessage(Message message){
           try{
                objectOutputStream.writeObject(message);
