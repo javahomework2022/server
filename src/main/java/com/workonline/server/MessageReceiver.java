@@ -76,7 +76,8 @@ public class MessageReceiver implements Runnable{
                          String[] results=result.split(" ");
                          Message newmessage=new Message();
                          if(results[0].equals("create_room_success")){
-                              newmessage.command=results[1];
+                              newmessage.command=result;
+                              newmessage.document = message.document;
                               SendMessage(newmessage);
                          }
                     }
@@ -125,7 +126,7 @@ public class MessageReceiver implements Runnable{
                                    e.printStackTrace();
                               }
                               Message newmessage = new Message();
-                              Text_Operation text_operation = new Text_Operation();
+                              Text_Operation text_operation = new Text_Operation(0,username,operation);
                               text_operation.operation = operation;
                               text_operation.username = message.operation.username;
                               newmessage.operation = text_operation;

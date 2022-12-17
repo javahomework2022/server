@@ -23,7 +23,7 @@ public class Room implements Serializable {
         this.userid=userid;
     }
     public Room(User loginUser){
-        this.roomId=Integer.toString(currentId+1);
+        this.roomId=Integer.toString(++currentId);
         roomOwner=loginUser;
     }
     public String creatRoom(String text){
