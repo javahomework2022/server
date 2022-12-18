@@ -131,8 +131,7 @@ public class MessageReceiver implements Runnable{
                                         }
                                         else if(i.isDelete())
                                         {
-                                             int len = newStr.length();
-                                             newStr.delete(len-i.getDeleteLength(),len);
+                                             index+=i.getDeleteLength();
                                         }
                                         else if(i.isRetain())
                                         {
