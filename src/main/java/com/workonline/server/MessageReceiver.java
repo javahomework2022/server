@@ -1,5 +1,9 @@
+/**
+ * 这个包是客户端需要运行的程序包.
+ * @author
+ * @version JDK17
+ */
 package com.workonline.server;
-
 
 import com.workonline.util.*;
 
@@ -12,6 +16,9 @@ import java.util.Map;
 
 import static com.workonline.server.Room.enterRoom;
 
+/**
+ * 该类用于接收用户发送的信息并对其进行处理.
+ */
 public class MessageReceiver implements Runnable{
      Socket socket;
      ObjectInputStream objectInputStream;
@@ -22,13 +29,19 @@ public class MessageReceiver implements Runnable{
      static String[] commands;
      boolean ifLogined=true;
      static Map<String,ObjectOutputStream>streams=new HashMap<>();
+
+     /**
+      * 构造器.
+      * @param socket 用户传输的套接字
+      * @throws IOException 在得到输入输出流方法中抛出的异常
+      */
      public MessageReceiver(Socket socket) throws IOException {
           this.socket = socket;
           this.objectInputStream = new ObjectInputStream(socket.getInputStream());
           this.objectOutputStream=new ObjectOutputStream(socket.getOutputStream());
      }
      /**
-     * 这个方法会在新的线程里处理接收到的Message
+     * 这个方法会在新的线程里处理接收到的Message.
      */
      @Override
      public void run() {
@@ -168,6 +181,11 @@ public class MessageReceiver implements Runnable{
           }
      }
 
+     /**
+      * 对指定的用户发送信息.
+      * @param newmessage 要发送的信息对象
+      * @param userid 给这个ID的用户发送信息
+      */
      private void SendMessageByUserid(Message newmessage, String userid) {
           try {
                streams.get(userid).writeObject(newmessage);
@@ -179,6 +197,10 @@ public class MessageReceiver implements Runnable{
           }
      }
 
+     /**
+      * 给当前线程对应的连接用户发送信息.
+      * @param message 要发送的信息对象
+      */
      public void SendMessage(Message message){
           try{
                objectOutputStream.writeObject(message);
@@ -190,16 +212,4 @@ public class MessageReceiver implements Runnable{
                e.printStackTrace();
           }
      }
-     /*public void SendMessage(Message message,String userid){
-          synchronized (result){
-               try{
-                    ObjectOutputStream newobjectoutput=
-                    objectOutputStream.writeObject(message);
-                    objectOutputStream.flush();
-               }
-               catch (IOException e){
-                    e.printStackTrace();
-               }
-          }
-     }*/
 }

@@ -1,24 +1,30 @@
+/**
+ * 这个包是客户端需要运行的程序包.
+ * @author
+ * @version JDK17
+ */
 package com.workonline.server;
-
-import com.workonline.util.Message;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.cert.CertPathChecker;
 import java.util.HashMap;
-import java.util.Map;
-
 
 /**
- *
+ * 该类为程序主类，主线程在此运行，从中分出其他线程.
  */
 public class Program {
-    static String flag="null";
-    //static Map<String,Thread> userThread=new HashMap<>();
-    //一个用户名对于一个输出流,登录后添加
+    /**
+     * 用户名与输出流对应的哈希表.
+     */
     public static HashMap<String, ObjectOutputStream> streams = new HashMap<>();
+
+    /**
+     * 程序主线程，主入口.
+     * @param args main方法的参数
+     * @throws IOException 在得到输入输出流方法中抛出的异常
+     */
     public static void main(String[] args) throws IOException {
         //主线程接收tcp请求，对于每个tcp新建线程接收Message，在每一个线程里直接调用SendMessage就好了
 
@@ -35,8 +41,4 @@ public class Program {
             }
 
     }
-
-    public static final Object locker = new Object();
-
-
 }
