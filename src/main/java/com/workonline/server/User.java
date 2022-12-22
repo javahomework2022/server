@@ -8,14 +8,19 @@ package com.workonline.server;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 这个类用于构建用户对象.
+ */
 public class User {
     String id;
     String password;
     /**
-     * 用于存储所有用户的账号密码
+     * 用于存储所有用户的账号密码.
      */
     public static Map<String,User> userlist=new HashMap<>();
-    //每个用户所在的房间列表
+    /**
+     * 每个用户所在房间的列表.
+     */
     public Map<String, Room> roomlist=new HashMap<>();
 
     /**

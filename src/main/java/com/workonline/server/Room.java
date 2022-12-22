@@ -16,15 +16,28 @@ import com.workonline.util.*;
  * 该类用于构建房间对象并处理相关行为
  */
 public class Room implements Serializable {
+    /**
+     * 房间中编辑的文档.
+     */
     String text;
+    /**
+     * 房间房主.
+     */
     User roomOwner;
+    /**
+     * 当前房间ID.
+     */
     String roomId;
-    String userid;
-    //存储当前房间中的用户
+    /**
+     * 存储当前房间中的用户.
+     */
     Map<String,User>roomUser=new HashMap<>();
     //存储所有的房间
     static Map<String,Room>roomlist=new HashMap<>();
     static int currentId=10000;
+    /**
+     * 该房间中用户历史操作集合.
+     */
     ArrayList<Operation> operations = new ArrayList<>();
 
     /**

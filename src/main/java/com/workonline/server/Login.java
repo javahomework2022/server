@@ -23,6 +23,7 @@ public class Login {
 
     /**
      * 用于判断用户登录时用户名与密码是否正确.
+     * @return 登录成功或失败的字符串
      */
     public String login(){
         if (User.userlist.containsKey(id)&&User.userlist.get(id).password.equals(password)) {
